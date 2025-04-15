@@ -1,0 +1,9 @@
+apache-airflow
+asyncio
+pymysql
+pandas
+sqlalchemy
+boto3
+uvicorn
+dotenv
+pyarrow

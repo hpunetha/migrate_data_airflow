@@ -1,0 +1,82 @@
+{
+    "batch_size": 100000,
+    "delete_staging": false,
+    "data_sources": [
+        {
+            "type": "mysql",
+            "host": "MYSQL_HOST",
+            "user": "MYSQL_USER",
+            "password": "MYSQL_PASSWORD",
+            "database": "MYSQL_DB"
+        },
+        {
+            "type": "s3",
+            "bucket": "S3_BUCKET",
+            "storage": "minio"
+        }
+    ],
+    "targets": [
+        {
+            "type": "mariadb",
+            "host": "MARIADB_HOST",
+            "user": "MARIADB_USER",
+            "password": "MARIADB_PASSWORD",
+            "database": "MARIADB_DB"
+        },
+        {
+            "type": "s3",
+            "bucket": "S3_BUCKET",
+            "storage": "minio"
+        }
+    ],
+    "tables": [
+        {
+            "source": "employees",
+            "source_type": "mysql",
+            "target": "employees",
+            "transformations": ["strip_name", "calculate_tenure"]
+        },
+        {
+            "source": "departments",
+            "source_type": "mysql",
+            "target": "departments",
+            "transformations": []
+        },
+        {
+            "source": "salaries",
+            "source_type": "mysql",
+            "target": "salaries",
+            "transformations": []
+        },
+        {
+            "source": "migrated_data/employees.parquet",
+            "source_type": "s3",
+            "target": "employees",
+            "transformations": []
+        },
+        {
+            "source": "migrated_data/departments.csv",
+            "source_type": "s3",
+            "target": "departments",
+            "transformations": []
+        },
+        {
+            "source": "migrated_data/salaries.csv",
+            "source_type": "s3",
+            "target": "salaries",
+            "transformations": []
+        }
+    ],
+    "transformations": {
+        "strip_name": {
+            "column": "name",
+            "operation": "strip",
+            "output_column": "name"
+        },
+        "calculate_tenure": {
+            "column": "joining_date",
+            "operation": "compute_tenure",
+            "output_column": "tenure"
+        }
+    }
+}
