@@ -2,7 +2,7 @@ from etl.config import load_config
 from etl.extract import extract_data
 from etl.transform import transform_data, process_large_table
 from etl.load import load_data
-from etl.s3_utils import save_to_s3
+from etl.s3_utils import save_to_s3, read_from_s3
 import os
 from dotenv import load_dotenv, dotenv_values
 
@@ -103,6 +103,49 @@ def run_migration_in_batches(**kwargs):
             batch_size = config.get("batch_size", 100000)
             delete_staging = bool(config.get("delete_staging", False))
             process_large_table(source_table, target_table, batch_size, delete_staging, transformations, staging_datatype="parquet")
+
+
+def run_migration_s3():
+    print("********* Running S3 migration process")
+    env_set_flag = set_env_variables()
+    if not env_set_flag:
+        print("Environment variables not set. Exiting migration process.")
+        raise FileNotFoundError("Required .env not found at /opt/airflow/.env")
+
+    config = load_config()
+    if not config:
+        print("No config found. Exiting migration process...")
+        raise FileNotFoundError("No config provided via dag_run.conf or config.json")
+    print("[INFO] Using config:", config)
+
+    tables = config.get("tables", [])
+
+    if not tables:
+        raise RuntimeError("No tables found in dag_run.conf or config.json")
+
+    for table in tables:
+        if table.get("source_type") == "s3":  # Only process S3-based sources
+            source_file = table["source"]
+            target_table = table["target"]
+            transformations = table.get("transformations", [])
+
+            # Extract the file extension to determine the datatype
+            file_extension = os.path.splitext(source_file)[1].lower()  # Get file extension
+
+            # Map file extensions to target datatypes
+            if file_extension == ".csv":
+                s3_datatype = "csv"
+            elif file_extension == ".parquet":
+                s3_datatype = "parquet"
+            else:
+                raise RuntimeError(f"Unsupported file type: {file_extension}")
+
+            # Read from S3 based on the detected file type
+            df = read_from_s3(source_file, s3_datatype)
+            df = transform_data(df, transformations)
+            load_data(df, target_table)
+
+    return {"message": "S3 to MariaDB migration completed successfully!"}
 
 
 # if __name__ == "__main__":
