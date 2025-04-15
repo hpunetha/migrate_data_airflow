@@ -1,7 +1,7 @@
-# Airflow Example Repository
+# Airflow Data Migration
 
 This repository contains a setup for Apache Airflow with Docker Compose, including example DAGs and scripts for task execution.
-I have referred this [repo](https://github.com/franceoliver/airflow_example_repo) for base example and added upon it for additional migration scripts.
+I have referred this [repo - Airflow Example Repository](https://github.com/franceoliver/airflow_example_repo) for base example and added upon it for additional migration scripts.
 
 ## Prerequisites
 

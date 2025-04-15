@@ -99,10 +99,10 @@ def run_migration_in_batches(**kwargs):
         if table.get("source_type") == "mysql":
             source_table = table["source"]
             target_table = table["target"]
-            # transformations = table.get("transformations", [])
+            transformations = table.get("transformations", [])
             batch_size = config.get("batch_size", 100000)
             delete_staging = bool(config.get("delete_staging", False))
-            process_large_table(source_table, target_table, batch_size, delete_staging, staging_datatype="parquet")
+            process_large_table(source_table, target_table, batch_size, delete_staging, transformations, staging_datatype="parquet")
 
 
 # if __name__ == "__main__":
