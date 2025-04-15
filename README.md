@@ -1,6 +1,7 @@
 # Airflow Example Repository
 
 This repository contains a setup for Apache Airflow with Docker Compose, including example DAGs and scripts for task execution.
+I have referred this [repo](https://github.com/franceoliver/airflow_example_repo) for base example and added upon it for additional migration scripts.
 
 ## Prerequisites
 
@@ -10,18 +11,32 @@ This repository contains a setup for Apache Airflow with Docker Compose, includi
 ## Repository Structure
 
 ```
-airflow_example_repo/
+migrate_data_airflow/
 ├── dags/
-│   ├── basic_dag.py
-│   ├── dependent_dag.py
+│   ├── etl/
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── db.py
+│   │   ├── extract.py
+│   │   ├── load.py
+│   │   ├── migrate.py
+│   │   ├── s3_utils.py
+│   │   ├── transform.py
+│   ├── scripts/
+│   │   ├── __init__.py
+│   │   ├── custom_operator.py
+│   │   ├── task_functions.py
+│   ├── __init__.py
 │   ├── advanced_dag.py
-│   └── scripts/
-│       └── task_functions.py
-├── Dockerfile
-├── docker-compose.yml
-├── entrypoint.sh
-├── requirements.txt
-└── README.md
+│   ├── dummy_test_dag.py
+│   ├── example_dag_1.py
+│   ├── example_dag_2.py
+│   ├── example_dag_3.py
+│   ├── migrate_dag.py
+│   ├── migrate_large_table_in_batches_dag.py
+├── logs/
+
+
 ```
 
 ## Setup Instructions
@@ -30,7 +45,7 @@ airflow_example_repo/
 
    ```bash
    git clone <repository_url>
-   cd airflow_example_repo
+   cd migrate_data_airflow
    ```
 
 2. **Build the Docker Images**
@@ -172,12 +187,7 @@ INSERT INTO salaries (employee_id, base_salary, bonus, effective_date) VALUES
 (5, 55000.00, 4000.00, '2023-01-01');
 ```
 
-### 3. Verify the Primary Key
-```sql
-SHOW KEYS FROM employees WHERE Key_name = 'PRIMARY';
-```
-
-### 4. Create a bucket in minio
+### 3. Create a bucket in minio
 - Open the MinIO Console at `http://localhost:9001`.
 - Login with user and password as specified in the MinIO setup. (default is `root` and `password`)
 - Create a bucket named 'bucket'
@@ -203,11 +213,10 @@ docker network connect dbnetwork "minio"
 ```
 replace (dbnetwork) with network used for airflow on running docker compose (if changed)
 
-### 4. Run the migrate_data DAG
+### 4. Run the migrate_data DAG or migrate_large_table_in_batches_dag
+The config.json file contains the base config which is used for copying specific tables or specific transformations. Similiar can be provided while running the dag and if provided will override the config.json 
 
 ---
-This completes the setup for FastMigration. 🚀
-
 
 
 
