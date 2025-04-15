@@ -54,7 +54,10 @@ def transform_data(df: pd.DataFrame, transformations: list) -> pd.DataFrame:
     return df
 
 
-def process_large_table(source_table, target_table, batch_size, delete_staging, staging_datatype="parquet"):
+def process_large_table(source_table, target_table, batch_size, delete_staging,
+                        transformations=[],
+                        staging_datatype="parquet"
+                        ):
     engine = get_db_engine("mysql", "source")
     offset = 0
     batch_num = 1
@@ -67,6 +70,7 @@ def process_large_table(source_table, target_table, batch_size, delete_staging, 
         df = pd.read_sql(f"SELECT * FROM {source_table} LIMIT {batch_size} OFFSET {offset}", engine)
         if df.empty:
             break
+        df = transform_data(df, transformations)
         upload_to_staging(df, staging_prefix, batch_num, target_datatype)
         offset += batch_size
         batch_num += 1
